@@ -30,17 +30,14 @@ def update_company_emails():
                 try:
                     cursor.execute(
                         f'UPDATE employees\
-                        SET company_email = CONCAT(SUBSTRING(first_name, 1, 1), last_name, {curIteration}, "@company.net")
+                        SET company_email = CONCAT(SUBSTRING(first_name, 1, 1), last_name, {curIteration}, "@company.net")\
                         WHERE emp_no = {emp_no[0]}'
                     )
-                    # cursor.execute(f'select * from employees where emp_no = {emp_no[0]}')
-                    # print(cursor.fetchone())
                     break
                 except:
                     curIteration += 1
             else:
                 raise Exception("Exceeded max attempts to insert employee, something may be wrong or you need to increase your max attempts")
-            # print(f'{e}')
     print("Done updating company emails")
     connection.commit() 
 
@@ -73,14 +70,11 @@ def update_personal_emails():
                         f'UPDATE employees\
                         SET personal_email = CONCAT(SUBSTRING(first_name, 1, 1), last_name, {curIteration}, "@personal.net")\
                         WHERE emp_no = {emp_no[0]}')
-                    # cursor.execute(f'select * from employees where emp_no = {emp_no[0]}')
-                    # print(cursor.fetchone())
                     break
                 except:
                     curIteration += 1
             else:
                 raise Exception("Exceeded max attempts to insert employee, something may be wrong or you need to increase your max attempts")
-            # print(f'\n\n{e}')
     print("Done updating personal emails")
     connection.commit()
 
@@ -123,4 +117,16 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+'''
+    1. Add attribute company_email, personal_email(null), and phone to employees table
+    2. Update employees.company_email address of each employee
+        a. If the email is taken add an integer value to end of last name
+        b. If that is taken increase integer by 1, repeat as needed
+    3. Update employees.personal_email for each employee who has senior in title.title
+    4. Update employees.phone for each employee
+        a. append 801-6
+        b. if length of employee number is 5 digits add a 0
+        c. append employee number
+'''
 
