@@ -17,6 +17,7 @@ BEGIN
         to_date = CURDATE()
     WHERE
         to_date = '9999-01-01'
+        
             AND emp_no IN (SELECT 
                 emp_no
             FROM

@@ -1,5 +1,6 @@
 from mysql.connector import connect, Error
 from env import secrets
+import subprocess
 
 def get_file_as_string(filename):
     fileString = ''
@@ -50,15 +51,32 @@ def main():
     titleCount = cursor.fetchall()
 
     forecastedCost = []
+    totalCost = 0
 
     for i, salary in enumerate(averageSalaries):
-        # print(titleCount[i])
-        forecastedCost.append((averageSalaries[i][0], round(averageSalaries[i][1] * titleCount[i][1], 2)))
+        cost = round(averageSalaries[i][1] * titleCount[i][1], 2) 
+        forecastedCost.append((averageSalaries[i][0], cost))
+        totalCost += cost
 
-    
+    forecastedCost = sorted(forecastedCost, key=lambda x: x[1], reverse=True)
     print(forecastedCost)
 
     # connection.commit()
+
+    reportString =  '''#Projection Report
+
+In order from most expensive group to least expensive group.
+'''
+
+    for i, tuple in enumerate(forecastedCost):
+        formattedCost = '${:,.2f}'.format(forecastedCost[i][1])
+        formattedAverage = '${:,.2f}'.format(averageSalaries[i][1])
+        reportString += f'{i+1}. There are {titleCount[i][1]} {tuple[0]}s with an average salary of {formattedAverage}. This costs {formattedCost} over 1 year.\n'
+
+    reportString += f'''\nThe most expensive group at our company are the {forecastedCost[0][0]}s. It would be best to reduce costs starting with them. The cheapest group are the {forecastedCost[-1][0]}s, we may want to think about hiring more if their work load is getting to be too much. The total cost of all employees will be {'${:,.2f}'.format(totalCost)}'''
+
+    with open("report.md", 'w') as f:
+        f.write(reportString)
 
     connection.close()
 

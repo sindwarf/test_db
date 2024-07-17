@@ -17,6 +17,4 @@ result = mycursor.fetchall()
 
 print(result)
 
-# https://stackoverflow.com/questions/19472922/reading-external-sql-script-in-python
-
 connection.close()
