@@ -27,7 +27,8 @@ def main():
     except:
         print("Columns already created.")
         connection.rollback()
- 
+
+    cursor.execute('SET GLOBAL local_infile=1;')
     # Import terminated employees as temporary table
     cursor.execute('CREATE TEMPORARY TABLE terminate_employees\
     (\

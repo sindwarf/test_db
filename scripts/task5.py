@@ -63,6 +63,8 @@ def main():
                     ("Staff", .05), 
                     ("Technique Leader", .08),
                     ("Senior Staff", .065)]
+    
+    cursor.execute('ALTER TABLE salaries MODIFY COLUMN salary DECIMAL(14,8)')
 
     for item in raiseAmount:
         updateQuery = f'''
@@ -82,6 +84,7 @@ def main():
         cursor.execute(updateQuery)
         print("Updated: ", item[0])
 
+    cursor.execute('ALTER TABLE salaries MODIFY COLUMN salary INT')
     postUpdateSalaries = []
     for title in jobTitles:
         cursor.execute(f'''
@@ -103,12 +106,16 @@ def main():
     for i, set in enumerate(verificationSalaries):
         for j, value in enumerate(verificationSalaries[i][1]):
             preUpdateSalary = verificationSalaries[i][1][j][0]
-            postUpdateSalary = postUpdateSalaries[i][1][j][0] 
-            expectedSalary = round(preUpdateSalary + (preUpdateSalary) * raiseAmount[i][1])
+            postUpdateSalary = postUpdateSalaries[i][1][j][0]
+            try:
+                expectedSalary = round(preUpdateSalary + (preUpdateSalary) * raiseAmount[i][1])
+            except TypeError:
+                print(f"Couldnt multiply {type(preUpdateSalary)} and {type(raiseAmount[i][1])}")
 
             if(expectedSalary != postUpdateSalary):
                 connection.rollback()
                 raise Exception(f'''
+                                {i}:{j}
                 Values were not calculated correctly
                 Original: {preUpdateSalary}
                 New: {postUpdateSalary}

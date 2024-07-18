@@ -31,14 +31,14 @@ def main():
     
     # Using a to_date of 9999-01-01 ensures that we are only looking at currently employed salaries
     query = '''
-        SELECT t.title, AVG(s.salary)
+        SELECT t.title, sum(s.salary)
         FROM salaries s JOIN titles t on s.emp_no = t.emp_no
-        WHERE s.to_date = '9999-01-01'
+        WHERE s.to_date = '9999-01-01' AND t.to_date = '9999-01-01'
         GROUP BY title
         ORDER BY title
     '''
     cursor.execute(query)
-    averageSalaries = cursor.fetchall()
+    summedSalaries = cursor.fetchall()
 
     query = '''
         SELECT title, COUNT(title)
@@ -53,15 +53,11 @@ def main():
     forecastedCost = []
     totalCost = 0
 
-    for i, salary in enumerate(averageSalaries):
-        cost = round(averageSalaries[i][1] * titleCount[i][1], 2) 
-        forecastedCost.append((averageSalaries[i][0], cost))
-        totalCost += cost
+    for i, salary in enumerate(summedSalaries):
+        forecastedCost.append((salary[0], int(salary[1]), titleCount[i][1]))
+        totalCost += salary[1]
 
     forecastedCost = sorted(forecastedCost, key=lambda x: x[1], reverse=True)
-    print(forecastedCost)
-
-    # connection.commit()
 
     reportString =  '''#Projection Report
 
@@ -69,9 +65,8 @@ In order from most expensive group to least expensive group.
 '''
 
     for i, tuple in enumerate(forecastedCost):
-        formattedCost = '${:,.2f}'.format(forecastedCost[i][1])
-        formattedAverage = '${:,.2f}'.format(averageSalaries[i][1])
-        reportString += f'{i+1}. There are {titleCount[i][1]} {tuple[0]}s with an average salary of {formattedAverage}. This costs {formattedCost} over 1 year.\n'
+        formatted_salary = '${:,.0f}'.format(tuple[1])
+        reportString += f'{i+1}. There are {forecastedCost[i][2]} {tuple[0]}s. This costs {formatted_salary} over 1 year.\n'
 
     reportString += f'''\nThe most expensive group at our company are the {forecastedCost[0][0]}s. It would be best to reduce costs starting with them. The cheapest group are the {forecastedCost[-1][0]}s, we may want to think about hiring more if their work load is getting to be too much. The total cost of all employees will be {'${:,.2f}'.format(totalCost)}'''
 
